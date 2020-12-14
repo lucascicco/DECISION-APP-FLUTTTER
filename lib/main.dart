@@ -48,13 +48,25 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _startGame() {
-    int selectedIndex = Random().nextInt(_userDecisions.length);
+    List<int> _available_indexs = _userDecisions
+        .asMap()
+        .entries
+        .map((entry) {
+          if (!entry.value.selected) {
+            return entry.key;
+          }
+        })
+        .where((item) => item != null)
+        .toList();
 
-    int _initialLoop =
-        selectedIndex + 1 == _userDecisions.length ? 0 : selectedIndex + 1;
+    if (_available_indexs.length == 1) {
+      return;
+    }
 
-    print(
-        'valor index inicial $selectedIndex, valor inicial do loop $_initialLoop');
+    int selectedIndex =
+        _available_indexs[Random().nextInt(_available_indexs.length)];
+
+    int _initialLoop = Random().nextInt(_userDecisions.length);
 
     setState(() {
       started = true;
@@ -65,16 +77,21 @@ class _HomePageState extends State<HomePage> {
     _startTimer(selectedIndex, _initialLoop);
   }
 
+  void _gameFinished() {
+    // start some animation
+  }
+
   void _startTimer(int _inicialIndex, int _inicialLoop) {
     new Timer.periodic(Duration(milliseconds: 200), (Timer timer) {
       if (_start == 0) {
         setState(() {
-          _start = 4000;
+          _start = 2000;
           loopingIndex = _inicialIndex;
+          _userDecisions[_inicialIndex].selected = true;
+          started = false;
           timer.cancel();
         });
       } else {
-        print('its has been called');
         setState(() {
           _start = _start - 200;
           loopingIndex =
@@ -95,17 +112,26 @@ class _HomePageState extends State<HomePage> {
             width: double.infinity,
             child: Column(
               children: <Widget>[
+                HandlingData(_addNewDecision),
                 if (started)
                   Container(child: Text(_userDecisions[loopingIndex].title)),
-                HandlingData(_addNewDecision),
                 if (_userDecisions.length > 1)
                   Container(
-                    child: RaisedButton(
-                      child: Text('Rodar decisão'),
-                      onPressed: _startGame,
+                    child: Expanded(
+                      flex: 1,
+                      child: Column(
+                        children: [
+                          Container(
+                              child: RaisedButton(
+                            child: Text(started ? 'Decidindo...' : 'Decida'),
+                            onPressed: _startGame,
+                          )),
+                          ListOfItems(
+                              _userDecisions, loopingIndex, indexSelected)
+                        ],
+                      ),
                     ),
-                  ),
-                ListOfItems(_userDecisions)
+                  )
               ],
             )));
   }
