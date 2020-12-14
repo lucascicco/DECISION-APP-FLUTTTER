@@ -17,17 +17,17 @@ class ListOfItems extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        width: 150,
-        height: 250,
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey, width: 1.0),
-          color: Color.fromRGBO(220, 220, 220, 1),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: ListView.builder(
-            itemCount: _listDecisions.length,
-            itemBuilder: (ctx, index) {
-              return _buildWidget(index, _listDecisions[index]);
-            }));
+      height: 250,
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey, width: 1.0),
+        color: Color.fromRGBO(220, 220, 220, 1),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: ListView.builder(
+          itemCount: _listDecisions.length,
+          itemBuilder: (ctx, index) {
+            return _buildWidget(index, _listDecisions[index]);
+          }),
+    );
   }
 }

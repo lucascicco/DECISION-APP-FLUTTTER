@@ -1,5 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import './models/insert_text.dart';
@@ -35,6 +39,12 @@ class _HomePageState extends State<HomePage> {
   int loopingIndex;
   int _start = 4000;
 
+  void _startGame() {
+    setState(() {
+      gameStatus = 2;
+    });
+  }
+
   void _addNewDecision(String txTitle) {
     final newDecision = InsertText(
       title: txTitle,
@@ -59,9 +69,8 @@ class _HomePageState extends State<HomePage> {
         .toList();
 
     if (availableIndexs.length == 1) {
-      // ask?
       return setState(() {
-        gameStatus = 4;
+        gameStatus = 5;
       });
     }
 
@@ -71,7 +80,7 @@ class _HomePageState extends State<HomePage> {
     int _initialLoop = Random().nextInt(_userDecisions.length);
 
     setState(() {
-      gameStatus = 2;
+      gameStatus = 3;
       indexSelected = selectedIndex;
       loopingIndex = _initialLoop;
     });
@@ -96,7 +105,7 @@ class _HomePageState extends State<HomePage> {
           _start = 2000;
           loopingIndex = _inicialIndex;
           _userDecisions[_inicialIndex].selected = true;
-          gameStatus = 3;
+          gameStatus = 4;
           timer.cancel();
         });
       } else {
@@ -109,42 +118,105 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  Widget _buildAppBar() {
+    return Platform.isIOS
+        ? CupertinoNavigationBar(
+            middle: Text(
+            'Jogo da decisão',
+          ))
+        : AppBar(
+            title: Text(
+            'Jogo da decisão',
+          ));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text('Decision App'),
-        ),
-        body: Container(
-            padding: EdgeInsets.all(15),
-            width: double.infinity,
+    final PreferredSizeWidget appBar = _buildAppBar();
+
+    final pageBody = SafeArea(
+        child: AnimatedContainer(
+            duration: Duration(seconds: 2),
+            curve: Curves.fastOutSlowIn,
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.red, width: 5.0),
+              borderRadius: BorderRadius.circular(10),
+            ),
             child: Column(
+              mainAxisAlignment: gameStatus == 1
+                  ? MainAxisAlignment.center
+                  : MainAxisAlignment.spaceAround,
               children: <Widget>[
-                if (gameStatus == 1) HandlingData(_addNewDecision),
+                if (gameStatus == 1)
+                  Column(children: [
+                    Center(
+                        child: HandlingData(_addNewDecision, _userDecisions)),
+                    if (_userDecisions.length > 1)
+                      ElevatedButton(
+                          child: Text('Iniciar o jogo'),
+                          onPressed: _startGame,
+                          style: ElevatedButton.styleFrom(
+                              primary: Colors.red,
+                              elevation: 1.5,
+                              onPrimary: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(32.0),
+                              ))),
+                  ]),
+
+                // GAME RUNNING.
                 if (gameStatus != 1)
-                  Container(child: Text(_userDecisions[loopingIndex].title)),
-                if (_userDecisions.length > 1)
-                  Container(
-                    child: Expanded(
-                      flex: 1,
-                      child: Column(
-                        children: [
-                          Container(
-                              child: RaisedButton(
-                            child: Text(
-                                gameStatus == 2 ? 'Decidindo...' : 'Decida'),
-                            onPressed: _decideNow,
-                          )),
-                          ListOfItems(
-                              _userDecisions, loopingIndex, indexSelected)
-                        ],
+                  Column(children: [
+                    if (loopingIndex != null)
+                      Text(_userDecisions[loopingIndex].title,
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold)),
+                    Container(
+                      width: double.infinity,
+                      child: Expanded(
+                        flex: 1,
+                        child: Column(
+                          children: [
+                            Container(
+                                child: ElevatedButton(
+                              child: Text(
+                                  gameStatus == 2 && loopingIndex != null
+                                      ? 'Decidindo...'
+                                      : 'Decida'),
+                              onPressed: _decideNow,
+                            )),
+                            if (loopingIndex != null)
+                              ListOfItems(
+                                  _userDecisions, loopingIndex, indexSelected)
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                if (gameStatus == 3 || gameStatus == 4)
-                  RaisedButton(
-                      child: Text('Jogue novamente'), onPressed: _resetGame)
+                  ]),
+
+                if (gameStatus == 4 || gameStatus == 5)
+                  ElevatedButton(
+                      child: Text('Jogue novamente'),
+                      onPressed: _resetGame,
+                      style: ElevatedButton.styleFrom(
+                          primary: Colors.redAccent,
+                          elevation: 1.5,
+                          onPrimary: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(32.0),
+                          )))
               ],
             )));
+
+    return Platform.isIOS
+        ? CupertinoPageScaffold(
+            child: pageBody,
+            navigationBar: appBar,
+          )
+        : Scaffold(
+            appBar: appBar,
+            body: pageBody,
+          );
   }
 }
