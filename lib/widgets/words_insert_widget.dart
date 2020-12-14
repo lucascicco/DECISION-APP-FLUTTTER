@@ -35,9 +35,12 @@ class _HandlingDataState extends State<HandlingData> {
   }
 
   void _submitData(BuildContext context) {
+    int itAlreadyExists = widget._userDecisions
+        .indexWhere((item) => item.title == _decisionText.text);
+
     if (_decisionText.text.isEmpty ||
         widget._userDecisions.length > 9 ||
-        widget._userDecisions.contains(_decisionText.text.trim())) {
+        itAlreadyExists != -1) {
       return _showErrorDialog(context,
           'Palavras repetidas e vazias não serão aceitas, e também, verifique o limite.');
     }

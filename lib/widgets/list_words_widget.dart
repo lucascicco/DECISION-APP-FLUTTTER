@@ -8,10 +8,14 @@ class ListOfItems extends StatelessWidget {
 
   ListOfItems(this._listDecisions, this.loopingIndex, this.indexSelected);
 
-  Text _buildWidget(int index, var decision) {
-    return Text(decision.title,
-        style:
-            TextStyle(fontWeight: decision.selected ? FontWeight.bold : null));
+  Row _buildWidget(int index, var decision) {
+    return Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+      Text(decision.title,
+          style: TextStyle(
+            fontWeight: decision.selected ? FontWeight.bold : null,
+            fontSize: 18,
+          )),
+    ]);
   }
 
   @override
@@ -26,7 +30,10 @@ class ListOfItems extends StatelessWidget {
       child: ListView.builder(
           itemCount: _listDecisions.length,
           itemBuilder: (ctx, index) {
-            return _buildWidget(index, _listDecisions[index]);
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: _buildWidget(index, _listDecisions[index]),
+            );
           }),
     );
   }
