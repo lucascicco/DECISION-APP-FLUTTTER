@@ -30,8 +30,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final List<InsertText> _userDecisions = [];
-
-  bool started = false;
+  int gameStatus = 1;
   int indexSelected;
   int loopingIndex;
   int _start = 4000;
@@ -47,8 +46,8 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void _startGame() {
-    List<int> _available_indexs = _userDecisions
+  void _decideNow() {
+    List<int> availableIndexs = _userDecisions
         .asMap()
         .entries
         .map((entry) {
@@ -59,17 +58,20 @@ class _HomePageState extends State<HomePage> {
         .where((item) => item != null)
         .toList();
 
-    if (_available_indexs.length == 1) {
-      return;
+    if (availableIndexs.length == 1) {
+      // ask?
+      return setState(() {
+        gameStatus = 4;
+      });
     }
 
     int selectedIndex =
-        _available_indexs[Random().nextInt(_available_indexs.length)];
+        availableIndexs[Random().nextInt(availableIndexs.length)];
 
     int _initialLoop = Random().nextInt(_userDecisions.length);
 
     setState(() {
-      started = true;
+      gameStatus = 2;
       indexSelected = selectedIndex;
       loopingIndex = _initialLoop;
     });
@@ -77,8 +79,14 @@ class _HomePageState extends State<HomePage> {
     _startTimer(selectedIndex, _initialLoop);
   }
 
-  void _gameFinished() {
-    // start some animation
+  void _resetGame() {
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        transitionDuration: Duration.zero,
+        pageBuilder: (_, __, ___) => HomePage(),
+      ),
+    );
   }
 
   void _startTimer(int _inicialIndex, int _inicialLoop) {
@@ -88,7 +96,7 @@ class _HomePageState extends State<HomePage> {
           _start = 2000;
           loopingIndex = _inicialIndex;
           _userDecisions[_inicialIndex].selected = true;
-          started = false;
+          gameStatus = 3;
           timer.cancel();
         });
       } else {
@@ -112,8 +120,8 @@ class _HomePageState extends State<HomePage> {
             width: double.infinity,
             child: Column(
               children: <Widget>[
-                HandlingData(_addNewDecision),
-                if (started)
+                if (gameStatus == 1) HandlingData(_addNewDecision),
+                if (gameStatus != 1)
                   Container(child: Text(_userDecisions[loopingIndex].title)),
                 if (_userDecisions.length > 1)
                   Container(
@@ -123,15 +131,19 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           Container(
                               child: RaisedButton(
-                            child: Text(started ? 'Decidindo...' : 'Decida'),
-                            onPressed: _startGame,
+                            child: Text(
+                                gameStatus == 2 ? 'Decidindo...' : 'Decida'),
+                            onPressed: _decideNow,
                           )),
                           ListOfItems(
                               _userDecisions, loopingIndex, indexSelected)
                         ],
                       ),
                     ),
-                  )
+                  ),
+                if (gameStatus == 3 || gameStatus == 4)
+                  RaisedButton(
+                      child: Text('Jogue novamente'), onPressed: _resetGame)
               ],
             )));
   }
