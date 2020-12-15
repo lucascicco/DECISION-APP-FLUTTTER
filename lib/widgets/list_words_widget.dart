@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/insert_text.dart';
+import 'package:flutter/scheduler.dart';
+import 'dart:async';
 
 class ListOfItems extends StatelessWidget {
   final _listDecisions;
@@ -9,29 +11,40 @@ class ListOfItems extends StatelessWidget {
   ListOfItems(this._listDecisions, this.loopingIndex, this.indexSelected);
 
   Row _buildWidget(int index, var decision) {
-    return Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
-      Text(decision.title,
-          style: TextStyle(
-            fontWeight: decision.selected ? FontWeight.bold : null,
-            fontSize: 18,
-          )),
-    ]);
+    return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Text(decision.title,
+              style: TextStyle(
+                fontWeight: decision.selected ? FontWeight.bold : null,
+                fontSize: 18,
+              )),
+        ]);
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: EdgeInsets.all(10),
       height: 250,
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey, width: 1.0),
-        color: Color.fromRGBO(220, 220, 220, 1),
+        color: Color.fromRGBO(220, 220, 220, 0.2),
         borderRadius: BorderRadius.circular(10),
       ),
       child: ListView.builder(
+          scrollDirection: Axis.vertical,
           itemCount: _listDecisions.length,
           itemBuilder: (ctx, index) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2),
+            return Container(
+              margin: EdgeInsets.symmetric(vertical: 5),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey, width: 1.0),
+                color: _listDecisions[index].selected
+                    ? Color.fromRGBO(220, 220, 220, 1.0)
+                    : Color.fromRGBO(220, 220, 220, 0.3),
+              ),
               child: _buildWidget(index, _listDecisions[index]),
             );
           }),

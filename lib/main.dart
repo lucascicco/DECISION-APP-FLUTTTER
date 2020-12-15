@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -32,17 +31,56 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   final List<InsertText> _userDecisions = [];
   int gameStatus = 1;
   int indexSelected;
   int loopingIndex;
   int _start = 4000;
 
+  AnimationController _controller;
+  Animation<Offset> _slideAnimation;
+  Animation<double> _opacityAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(
+        milliseconds: 300,
+      ),
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: Offset(0, -1.5),
+      end: Offset(0, 0),
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.fastOutSlowIn,
+      ),
+    );
+    _opacityAnimation = Tween(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeIn,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
+
   void _startGame() {
     setState(() {
       gameStatus = 2;
     });
+
+    new Future.delayed(const Duration(seconds: 5), _decideNow);
   }
 
   void _addNewDecision(String txTitle) {
@@ -139,12 +177,8 @@ class _HomePageState extends State<HomePage> {
             duration: Duration(seconds: 2),
             curve: Curves.fastOutSlowIn,
             padding: EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.red, width: 5.0),
-              borderRadius: BorderRadius.circular(10),
-            ),
             child: Column(
-              mainAxisAlignment: gameStatus == 1
+              mainAxisAlignment: gameStatus == 1 || gameStatus == 2
                   ? MainAxisAlignment.center
                   : MainAxisAlignment.spaceAround,
               children: <Widget>[
@@ -165,6 +199,13 @@ class _HomePageState extends State<HomePage> {
                               ))),
                   ]),
 
+                if (gameStatus == 2)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(),
+                    ],
+                  ),
                 // GAME RUNNING.
                 if (gameStatus != 1)
                   Column(children: [
@@ -172,27 +213,28 @@ class _HomePageState extends State<HomePage> {
                       Text(_userDecisions[loopingIndex].title,
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold)),
-                    Container(
-                      width: double.infinity,
-                      child: Expanded(
-                        flex: 1,
-                        child: Column(
-                          children: [
-                            Container(
-                                child: ElevatedButton(
-                              child: Text(
-                                  gameStatus == 2 && loopingIndex != null
-                                      ? 'Decidindo...'
-                                      : 'Decida'),
-                              onPressed: _decideNow,
-                            )),
-                            if (loopingIndex != null)
-                              ListOfItems(
-                                  _userDecisions, loopingIndex, indexSelected)
-                          ],
+                    if (gameStatus != 1 && gameStatus != 2)
+                      Container(
+                        width: double.infinity,
+                        child: Expanded(
+                          flex: 1,
+                          child: Column(
+                            children: [
+                              Container(
+                                  child: ElevatedButton(
+                                child: Text(
+                                    gameStatus == 3 && loopingIndex != null
+                                        ? 'Decidindo...'
+                                        : 'Decida'),
+                                onPressed: _decideNow,
+                              )),
+                              if (loopingIndex != null)
+                                ListOfItems(
+                                    _userDecisions, loopingIndex, indexSelected)
+                            ],
+                          ),
                         ),
                       ),
-                    ),
                   ]),
 
                 if (gameStatus == 4 || gameStatus == 5)
