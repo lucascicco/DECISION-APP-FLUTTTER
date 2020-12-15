@@ -178,29 +178,26 @@ class _HomePageState extends State<HomePage> {
                   ),
                 // GAME RUNNING.
                 if (gameStatus != 1 && gameStatus != 2)
-                  Column(children: [
-                    Text(_userDecisions[loopingIndex].title,
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold)),
-                    if (gameStatus != 1 && gameStatus != 2)
-                      Column(
-                        children: [
-                          if (gameStatus != 5)
-                            Container(
-                                child: ElevatedButton(
-                              child: Text(
-                                  gameStatus == 3 && loopingIndex != null
-                                      ? 'Decidindo...'
-                                      : 'Decida'),
-                              onPressed: gameStatus == 3 && loopingIndex != null
-                                  ? null
-                                  : _decideNow,
-                            )),
-                          ListOfItems(_userDecisions, loopingIndex,
-                              indexSelected, availableSpace, animate)
-                        ],
-                      ),
-                  ]),
+                  Expanded(
+                    child: Column(children: [
+                      Text(_userDecisions[loopingIndex].title,
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold)),
+                      SizedBox(height: 10),
+                      if (gameStatus != 5)
+                        Container(
+                            child: ElevatedButton(
+                          child: Text(gameStatus == 3 && loopingIndex != null
+                              ? 'Decidindo...'
+                              : 'Decida'),
+                          onPressed: gameStatus == 3 && loopingIndex != null
+                              ? null
+                              : _decideNow,
+                        )),
+                      ListOfItems(_userDecisions, loopingIndex, indexSelected,
+                          availableSpace, animate)
+                    ]),
+                  ),
 
                 if (gameStatus == 4 || gameStatus == 5)
                   ElevatedButton(
