@@ -31,56 +31,28 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
-    with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage> {
   final List<InsertText> _userDecisions = [];
   int gameStatus = 1;
   int indexSelected;
   int loopingIndex;
   int _start = 4000;
-
-  AnimationController _controller;
-  Animation<Offset> _slideAnimation;
-  Animation<double> _opacityAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: Duration(
-        milliseconds: 300,
-      ),
-    );
-    _slideAnimation = Tween<Offset>(
-      begin: Offset(0, -1.5),
-      end: Offset(0, 0),
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.fastOutSlowIn,
-      ),
-    );
-    _opacityAnimation = Tween(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeIn,
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _controller.dispose();
-  }
+  bool animate = false;
 
   void _startGame() {
     setState(() {
       gameStatus = 2;
     });
 
-    new Future.delayed(const Duration(seconds: 5), _decideNow);
+    new Future.delayed(
+        const Duration(seconds: 2), () => {_decideNow(), start_x()});
+  }
+
+  void start_x() {
+    print('it has been called');
+    setState(() {
+      animate = true;
+    });
   }
 
   void _addNewDecision(String txTitle) {
@@ -171,6 +143,12 @@ class _HomePageState extends State<HomePage>
   @override
   Widget build(BuildContext context) {
     final PreferredSizeWidget appBar = _buildAppBar();
+    final mediaQuery = MediaQuery.of(context);
+    final availableSpace = (mediaQuery.size.height -
+            appBar.preferredSize.height -
+            mediaQuery.padding.top) *
+        _userDecisions.length.toDouble() /
+        12;
 
     final pageBody = SafeArea(
         child: AnimatedContainer(
@@ -216,23 +194,19 @@ class _HomePageState extends State<HomePage>
                     if (gameStatus != 1 && gameStatus != 2)
                       Container(
                         width: double.infinity,
-                        child: Expanded(
-                          flex: 1,
-                          child: Column(
-                            children: [
-                              Container(
-                                  child: ElevatedButton(
-                                child: Text(
-                                    gameStatus == 3 && loopingIndex != null
-                                        ? 'Decidindo...'
-                                        : 'Decida'),
-                                onPressed: _decideNow,
-                              )),
-                              if (loopingIndex != null)
-                                ListOfItems(
-                                    _userDecisions, loopingIndex, indexSelected)
-                            ],
-                          ),
+                        child: Column(
+                          children: [
+                            Container(
+                                child: ElevatedButton(
+                              child: Text(
+                                  gameStatus == 3 && loopingIndex != null
+                                      ? 'Decidindo...'
+                                      : 'Decida'),
+                              onPressed: _decideNow,
+                            )),
+                            ListOfItems(_userDecisions, loopingIndex,
+                                indexSelected, availableSpace, animate)
+                          ],
                         ),
                       ),
                   ]),
