@@ -45,10 +45,10 @@ class _HomePageState extends State<HomePage> {
     });
 
     new Future.delayed(
-        const Duration(seconds: 2), () => {_decideNow(), start_x()});
+        const Duration(seconds: 2), () => {_decideNow(), startX()});
   }
 
-  void start_x() {
+  void startX() {
     print('it has been called');
     setState(() {
       animate = true;
@@ -78,12 +78,6 @@ class _HomePageState extends State<HomePage> {
         .where((item) => item != null)
         .toList();
 
-    if (availableIndexs.length == 1) {
-      return setState(() {
-        gameStatus = 5;
-      });
-    }
-
     int selectedIndex =
         availableIndexs[Random().nextInt(availableIndexs.length)];
 
@@ -95,7 +89,7 @@ class _HomePageState extends State<HomePage> {
       loopingIndex = _initialLoop;
     });
 
-    _startTimer(selectedIndex, _initialLoop);
+    _startTimer(selectedIndex, _initialLoop, availableIndexs.length == 2);
   }
 
   void _resetGame() {
@@ -108,14 +102,14 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _startTimer(int _inicialIndex, int _inicialLoop) {
+  void _startTimer(int _inicialIndex, int _inicialLoop, bool lastTty) {
     new Timer.periodic(Duration(milliseconds: 200), (Timer timer) {
       if (_start == 0) {
         setState(() {
           _start = 2000;
           loopingIndex = _inicialIndex;
           _userDecisions[_inicialIndex].selected = true;
-          gameStatus = 4;
+          gameStatus = lastTty ? 5 : 4;
           timer.cancel();
         });
       } else {
@@ -148,12 +142,10 @@ class _HomePageState extends State<HomePage> {
             appBar.preferredSize.height -
             mediaQuery.padding.top) *
         _userDecisions.length.toDouble() /
-        12;
+        (10 + _userDecisions.length * 0.5);
 
     final pageBody = SafeArea(
-        child: AnimatedContainer(
-            duration: Duration(seconds: 2),
-            curve: Curves.fastOutSlowIn,
+        child: Container(
             padding: EdgeInsets.all(10),
             child: Column(
               mainAxisAlignment: gameStatus == 1 || gameStatus == 2
@@ -185,29 +177,28 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                 // GAME RUNNING.
-                if (gameStatus != 1)
+                if (gameStatus != 1 && gameStatus != 2)
                   Column(children: [
-                    if (loopingIndex != null)
-                      Text(_userDecisions[loopingIndex].title,
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold)),
+                    Text(_userDecisions[loopingIndex].title,
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
                     if (gameStatus != 1 && gameStatus != 2)
-                      Container(
-                        width: double.infinity,
-                        child: Column(
-                          children: [
+                      Column(
+                        children: [
+                          if (gameStatus != 5)
                             Container(
                                 child: ElevatedButton(
                               child: Text(
                                   gameStatus == 3 && loopingIndex != null
                                       ? 'Decidindo...'
                                       : 'Decida'),
-                              onPressed: _decideNow,
+                              onPressed: gameStatus == 3 && loopingIndex != null
+                                  ? null
+                                  : _decideNow,
                             )),
-                            ListOfItems(_userDecisions, loopingIndex,
-                                indexSelected, availableSpace, animate)
-                          ],
-                        ),
+                          ListOfItems(_userDecisions, loopingIndex,
+                              indexSelected, availableSpace, animate)
+                        ],
                       ),
                   ]),
 
