@@ -67,6 +67,8 @@ class _HandlingDataState extends State<HandlingData> {
 
   @override
   Widget build(BuildContext context) {
+    final currentLength = widget._userDecisions.length.toString();
+
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey, width: 1.0),
@@ -85,7 +87,7 @@ class _HandlingDataState extends State<HandlingData> {
               contentPadding: EdgeInsets.zero,
               suffixStyle: TextStyle(fontSize: 18, color: Colors.purple),
               hintText: 'Digite uma opção',
-              helperText: 'Mínimo 2 opções. Máximo 10.',
+              helperText: 'Mín 2. Máx 10. $currentLength/10 opções',
             ),
             controller: _decisionText,
             keyboardType: TextInputType.text,

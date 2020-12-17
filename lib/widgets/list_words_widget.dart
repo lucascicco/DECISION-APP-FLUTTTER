@@ -6,10 +6,9 @@ class ListOfItems extends StatelessWidget {
   final loopingIndex;
   final indexSelected;
   final heightAnimated;
-  bool animate;
 
   ListOfItems(this._listDecisions, this.loopingIndex, this.indexSelected,
-      this.heightAnimated, this.animate);
+      this.heightAnimated);
 
   Row _buildWidget(int index, InsertText decision) {
     return Row(
@@ -28,9 +27,9 @@ class ListOfItems extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedContainer(
       padding: EdgeInsets.all(10),
-      duration: Duration(seconds: 2),
+      duration: Duration(seconds: 1),
       curve: Curves.fastOutSlowIn,
-      height: animate ? heightAnimated : 0,
+      height: heightAnimated,
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey, width: 1.0),
         color: Color.fromRGBO(220, 220, 220, 0.2),
