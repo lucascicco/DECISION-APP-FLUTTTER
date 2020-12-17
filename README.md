@@ -30,6 +30,6 @@ Para selecionar aleatoriamente um item dentro do array, foi necessário o uso do
 Agradeço a atenção, dê uma visualizada no repositório.
 Aberto a críticas.
 
-Obrigado,  
-Lucas Vitor.
+Obrigado, 
+Desevolvido por lucascicco.
 
